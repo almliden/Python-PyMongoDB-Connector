@@ -7,11 +7,10 @@ Connect to a MongoDB over ssh.
 ```python 
 from databaseConnection import DatabaseConnection, DatabaseConfigurator
 
-databaseConfig = DatabaseConfigurator('config.ini')
-dbcontext = DatabaseConnection(databaseConfig.Config())
+dbcontext = DatabaseConnection(DatabaseConfigurator('config.ini').Config())
 db = dbcontext.connect()
 
-mycollection = 'some-name'
+mycollection = 'some-name' 
 db.[mycollection].find_one({})
 ```
 
@@ -22,7 +21,7 @@ The connection needs the following configuration values:
  - `REMOTE_BIND_PORT`
  - `SSH_USER`
  - `SSH_PASS`
- - `MONGO_DB` (*optional, can be passed in later as an argument into the* `dbcontext.connect()`)
+ - `MONGO_DB` (*optional, but must then be passed in as an argument to* `dbcontext.connect()`)
  - `MONGO_USER` (*optional, only needed if authorization is enabled*)
  - `MONGO_PASS` (*optional, only needed if authorization is enabled*)
 

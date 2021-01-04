@@ -16,7 +16,7 @@ class DatabaseConfig:
 class DatabaseConnection:
   client=None
   db=None
-  databaseConfig=DatabaseConfig
+  databaseConfig=None
 
   def __init__(self, databaseConfig):
     self.databaseConfig=databaseConfig
@@ -31,6 +31,8 @@ class DatabaseConnection:
     self.server.start()
     self.client = pymongo.MongoClient(self.databaseConfig.REMOTE_BIND_ADDRESS, self.server.local_bind_port)
     database = database if database != None else self.databaseConfig.MONGO_DB
+    if (database == None):
+      raise Exception("You must provide a database name")
     self.db = self.client[database]
     self.db.authenticate(self.databaseConfig.MONGO_USER, self.databaseConfig.MONGO_PASS)
     return self.db
@@ -60,11 +62,7 @@ class DatabaseConfigurator:
     self.conf.REMOTE_BIND_PORT=int(parser.get('SSH Credentials', 'REMOTE_BIND_PORT'))
     self.conf.SSH_USER=parser.get('SSH Credentials', 'SSH_USER')
     self.conf.SSH_PASS=parser.get('SSH Credentials', 'SSH_PASS')
-    self.conf.MONGO_DB=parser.get('MongoDB Credentials', 'MONGO_DB')
-    self.conf.MONGO_USER=parser.get('MongoDB Credentials', 'MONGO_USER')
-    self.conf.MONGO_PASS=parser.get('MongoDB Credentials', 'MONGO_PASS')
-    return self.conf
-
-  def CustomConfigSource(self, databaseConfig):
-    self.conf = databaseConfig
+    self.conf.MONGO_DB=parser.get('MongoDB Credentials', 'MONGO_DB', fallback=None)
+    self.conf.MONGO_USER=parser.get('MongoDB Credentials', 'MONGO_USER', fallback=None)
+    self.conf.MONGO_PASS=parser.get('MongoDB Credentials', 'MONGO_PASS', fallback=None)
     return self.conf
