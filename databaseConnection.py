@@ -16,7 +16,7 @@ class DatabaseConfig:
 class DatabaseConnection:
   client=None
   db=None
-  databaseConfig=None
+  databaseConfig=DatabaseConfig
 
   def __init__(self, databaseConfig):
     self.databaseConfig=databaseConfig
@@ -34,7 +34,10 @@ class DatabaseConnection:
     if (database == None):
       raise Exception("You must provide a database name")
     self.db = self.client[database]
-    self.db.authenticate(self.databaseConfig.MONGO_USER, self.databaseConfig.MONGO_PASS)
+    try:
+      self.db.authenticate(self.databaseConfig.MONGO_USER, self.databaseConfig.MONGO_PASS)
+    except (pymongo.errors.OperationFailure):
+      print("Could not authenticate against %s", database)
     return self.db
 
   def __del__(self):
@@ -51,7 +54,7 @@ class DatabaseConfigurator:
 
   def __init__(self, configName='databaseConnectionConfig.ini'):
     self.configName = configName
-  
+
   def Config(self):
     if not os.path.isfile(self.configName):
       raise FileExistsError("Config file not found")
