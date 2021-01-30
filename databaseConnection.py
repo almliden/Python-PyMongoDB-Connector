@@ -18,7 +18,7 @@ class DatabaseConnection:
   db=None
   databaseConfig=DatabaseConfig
 
-  def __init__(self, databaseConfig):
+  def __init__(self, databaseConfig:DatabaseConfig):
     self.databaseConfig=databaseConfig
     self.server = SSHTunnelForwarder(
       ssh_address_or_host=self.databaseConfig.REMOTE_HOST,
@@ -46,7 +46,12 @@ class DatabaseConnection:
   def disconnect(self):
     if (self.client != None):
       self.client.disconnect()
-      self.server.stop()
+      try:
+        if (self.server != None):
+          self.server.close()
+          self.server.stop(force=True)
+      except:
+        pass
 
 class DatabaseConfigurator:
   conf = DatabaseConfig
