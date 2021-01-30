@@ -3,7 +3,7 @@ import pymongo
 import configparser
 import os.path
 
-class DatabaseConfig:
+class DatabaseConnectorConfig:
   REMOTE_HOST=None
   REMOTE_BIND_ADDRESS=None
   REMOTE_BIND_PORT=None
@@ -13,29 +13,29 @@ class DatabaseConfig:
   MONGO_USER=None
   MONGO_PASS=None
 
-class DatabaseConnection:
+class DatabaseConnector:
   client=None
   db=None
-  databaseConfig=DatabaseConfig
+  database_config=DatabaseConnectorConfig
 
-  def __init__(self, databaseConfig:DatabaseConfig):
-    self.databaseConfig=databaseConfig
+  def __init__(self, database_config:DatabaseConnectorConfig):
+    self.database_config=database_config
     self.server = SSHTunnelForwarder(
-      ssh_address_or_host=self.databaseConfig.REMOTE_HOST,
-      ssh_username=self.databaseConfig.SSH_USER,
-      ssh_password=self.databaseConfig.SSH_PASS,
-      remote_bind_address=(self.databaseConfig.REMOTE_BIND_ADDRESS, self.databaseConfig.REMOTE_BIND_PORT)
+      ssh_address_or_host=self.database_config.REMOTE_HOST,
+      ssh_username=self.database_config.SSH_USER,
+      ssh_password=self.database_config.SSH_PASS,
+      remote_bind_address=(self.database_config.REMOTE_BIND_ADDRESS, self.database_config.REMOTE_BIND_PORT)
     )
   
   def connect(self, database=None):
     self.server.start()
-    self.client = pymongo.MongoClient(self.databaseConfig.REMOTE_BIND_ADDRESS, self.server.local_bind_port)
-    database = database if database != None else self.databaseConfig.MONGO_DB
+    self.client = pymongo.MongoClient(self.database_config.REMOTE_BIND_ADDRESS, self.server.local_bind_port)
+    database = database if database != None else self.database_config.MONGO_DB
     if (database == None):
       raise Exception("You must provide a database name")
     self.db = self.client[database]
     try:
-      self.db.authenticate(self.databaseConfig.MONGO_USER, self.databaseConfig.MONGO_PASS)
+      self.db.authenticate(self.database_config.MONGO_USER, self.database_config.MONGO_PASS)
     except (pymongo.errors.OperationFailure):
       print("Could not authenticate against %s", database)
     return self.db
@@ -54,7 +54,7 @@ class DatabaseConnection:
         pass
 
 class DatabaseConfigurator:
-  conf = DatabaseConfig
+  conf = DatabaseConnectorConfig
   configName = None
 
   def __init__(self, configName='databaseConnectionConfig.ini'):
