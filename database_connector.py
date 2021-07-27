@@ -45,7 +45,11 @@ class DatabaseConnector:
 
   def disconnect(self):
     if (self.client != None):
-      self.client.disconnect()
+      try:
+        self.client.disconnect()
+      except:
+        print("Disconnect failed.")
+        pass
       try:
         if (self.server != None):
           self.server.close()
